@@ -1,4 +1,6 @@
 USE online_banking;
+ALTER TABLE accounts
+DROP FOREIGN KEY fk_client_id;
 
 DROP TABLE IF EXISTS clients;
 CREATE TABLE IF NOT EXISTS clients (
@@ -11,6 +13,7 @@ CREATE TABLE IF NOT EXISTS clients (
     birthday DATE NOT NULL,
     residential_address VARCHAR(200) NOT NULL
 );
+
 
 DROP TABLE IF EXISTS accounts;
 CREATE TABLE IF NOT EXISTS accounts (
@@ -62,6 +65,46 @@ UPDATE accounts
 SET account_type = 'Депозитный'
 WHERE account_number = 1;
 
+SELECT *
+FROM clients;
 
-DROP DATABASE online_banking;
+SELECT name, last_name, patronymic 
+FROM clients;
 
+SELECT currency
+FROM accounts
+WHERE currency IN ('USD');
+
+SELECT currency
+FROM accounts
+WHERE currency IN ('RUB')
+AND client_id > 6;
+
+SELECT currency
+FROM accounts
+WHERE currency IN ('EUR')
+OR client_id > 6;
+
+SELECT name, last_name, patronymic
+FROM clients
+ORDER BY last_name, name, patronymic;
+
+SELECT name, last_name, patronymic
+FROM clients
+ORDER BY last_name, name, patronymic
+LIMIT 5;
+
+SELECT name, last_name, birthday
+FROM clients
+WHERE MONTH(birthday) = MONTH(CURRENT_DATE());
+
+SELECT *
+FROM clients
+where phone_number > 1111111111
+order by name;
+
+SELECT *
+FROM clients
+where phone_number > 1111111111
+and phone_number < 6666666666
+order by name;
