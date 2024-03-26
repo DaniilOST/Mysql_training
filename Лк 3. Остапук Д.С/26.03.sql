@@ -108,3 +108,12 @@ FROM clients
 where phone_number > 1111111111
 and phone_number < 6666666666
 order by name;
+
+SELECT account_type, count(client_id)
+FROM accounts 
+GROUP BY account_type;
+
+SELECT account_type, count(client_id)
+FROM accounts 
+GROUP BY account_type
+HAVING count(client_id) > 2;

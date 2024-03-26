@@ -1,3 +1,7 @@
+DROP DATABASE IF EXISTS online_banking;
+
+CREATE DATABASE online_banking;
+
 USE online_banking;
 ALTER TABLE accounts
 DROP FOREIGN KEY fk_client_id;
@@ -108,3 +112,12 @@ FROM clients
 where phone_number > 1111111111
 and phone_number < 6666666666
 order by name;
+
+SELECT account_type, count(client_id)
+FROM accounts 
+GROUP BY account_type;
+
+SELECT account_type, count(client_id)
+FROM accounts 
+GROUP BY account_type
+HAVING count(client_id) > 2;
