@@ -70,5 +70,5 @@ AND student_id IN (1, 2);
 
 SELECT *
 FROM students
-WHERE student_group NOT IN ('Г-1', 'Г-2');
+WHERE student_group NOT IN ('10503322', '10503323');
 
