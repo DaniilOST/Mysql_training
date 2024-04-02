@@ -72,3 +72,28 @@ SELECT *
 FROM students
 WHERE student_group NOT IN ('10503322', '10503323');
 
+SELECT * 
+FROM Assessments as a, students as s
+WHERE a.Assessment > 0
+AND s.student_id IN (4, 5)
+AND a.date BETWEEN '2024-01-12' AND '2024-01-14';
+
+SELECT s.last_name AS student_last_name, t.last_name AS teacher_last_name
+FROM Assessments AS a
+JOIN students AS s 
+ON a.student_id = s.student_id
+JOIN teachers AS t 
+ON a.teacher_id = t.teacher_id;
+
+SELECT s.last_name AS student_last_name, t.last_name AS teacher_last_name, a.Assessment
+FROM Assessments AS a
+JOIN students AS s 
+ON a.student_id = s.student_id
+JOIN teachers AS t 
+ON a.teacher_id = t.teacher_id
+WHERE s.student_group LIKE '1050332%';
+
+SELECT s1.last_name AS student1_last_name, s2.last_name AS student2_last_name
+FROM students AS s1
+JOIN students AS s2
+ON s1.student_group = s2.student_group;
