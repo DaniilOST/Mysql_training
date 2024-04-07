@@ -210,6 +210,10 @@ FROM accounts AS a
 LEFT JOIN clients AS c ON a.client_id = c.client_id
 WHERE c.client_id IS NULL;
 
+
+#6Дз
+
+
 SELECT name, last_name, CONCAT(name, ' ', last_name) AS fullname
 FROM clients;
 
@@ -228,17 +232,7 @@ IFNULL(phone_number, '-') AS phone,
 IFNULL(email, '-') AS email
 FROM clients;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+SELECT name, last_name,
+COALESCE(phone_number, email, '-') AS client_contact
+FROM clients;
 
