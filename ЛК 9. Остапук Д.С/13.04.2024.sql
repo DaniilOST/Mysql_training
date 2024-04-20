@@ -1,26 +1,37 @@
+-- Удаляем существующую базу данных online_banking, если таковая существует
 DROP DATABASE IF EXISTS online_banking;
+
+-- Создаем новую базу данных online_banking
 CREATE DATABASE online_banking;
 
+-- Используем созданную базу данных
 USE online_banking;
 
+-- Удаляем таблицу clients, если она существует
 DROP TABLE IF EXISTS clients;
+
+-- Создаем таблицу clients для хранения информации о клиентах
 CREATE TABLE IF NOT EXISTS clients (
-    client_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(200) NOT NULL,
-    last_name VARCHAR(200) NOT NULL,
-    patronymic VARCHAR(200) NOT NULL,
-    phone_number VARCHAR(10) NOT NULL, 
-    email VARCHAR(200) NOT NULL, 
-    birthday DATE NOT NULL,
-    residential_address VARCHAR(200) NOT NULL
+    client_id INT PRIMARY KEY AUTO_INCREMENT, -- Уникальный идентификатор клиента
+    name VARCHAR(200) NOT NULL, -- Имя клиента
+    last_name VARCHAR(200) NOT NULL, -- Фамилия клиента
+    patronymic VARCHAR(200) NOT NULL, -- Отчество клиента
+    phone_number VARCHAR(10) NOT NULL, -- Номер телефона клиента
+    email VARCHAR(200) NOT NULL, -- Email клиента
+    birthday DATE NOT NULL, -- День рождения клиента
+    residential_address VARCHAR(200) NOT NULL -- Адрес проживания клиента
 );
 
+-- Удаляем таблицу contract_types, если она существует
 DROP TABLE IF EXISTS contract_types;
+
+-- Создаем таблицу contract_types для хранения типов контрактов
 CREATE TABLE IF NOT EXISTS contract_types (
-    contract_type_id INT PRIMARY KEY AUTO_INCREMENT,
-    contract_type_name VARCHAR(200) NOT NULL
+    contract_type_id INT PRIMARY KEY AUTO_INCREMENT, -- Уникальный идентификатор типа контракта
+    contract_type_name VARCHAR(200) NOT NULL -- Название типа контракта
 );
 
+-- Вставляем значения типов контрактов в таблицу contract_types
 INSERT INTO contract_types (contract_type_name)
 VALUES
     ('Кредитный'),
@@ -28,19 +39,24 @@ VALUES
     ('Сберегательный'),
     ('Текущий');
 
+-- Удаляем таблицу accounts, если она существует
 DROP TABLE IF EXISTS accounts;
+
+-- Создаем таблицу accounts для хранения информации о счетах клиентов
 CREATE TABLE IF NOT EXISTS accounts (
-    account_number INT PRIMARY KEY AUTO_INCREMENT,
-    account_type_id INT,
-    currency VARCHAR(200) NOT NULL,
-    client_id INT,
-    CONSTRAINT fk_client_id FOREIGN KEY (client_id) REFERENCES clients(client_id),
-    CONSTRAINT fk_account_type_id FOREIGN KEY (account_type_id) REFERENCES contract_types(contract_type_id)
+    account_number INT PRIMARY KEY AUTO_INCREMENT, -- Уникальный номер счета
+    account_type_id INT, -- Идентификатор типа счета
+    currency VARCHAR(200) NOT NULL, -- Валюта счета
+    client_id INT, -- Идентификатор клиента
+    CONSTRAINT fk_client_id FOREIGN KEY (client_id) REFERENCES clients(client_id), -- Внешний ключ на таблицу clients
+    CONSTRAINT fk_account_type_id FOREIGN KEY (account_type_id) REFERENCES contract_types(contract_type_id) -- Внешний ключ на таблицу contract_types
 );
 
+-- Добавляем ограничение UNIQUE на поле email в таблице clients
 ALTER TABLE clients
 ADD CONSTRAINT unique_email UNIQUE (email);
 
+-- Вставляем данные о клиентах в таблицу clients
 INSERT INTO clients (name, last_name, patronymic, phone_number, email, birthday, residential_address)
 VALUES
     ('Иван', 'Иванов', 'Иванович', '1234567890', 'ivan@example.com', '1990-01-01', 'ул. Ленина, д. 1'),
@@ -54,6 +70,7 @@ VALUES
     ('Анна', 'Иванова', 'Петровна', '7777777777', 'anna@example.com', '1987-04-15', 'ул. Кирова, д. 15'),
     ('Сергей', 'Сергеев', 'Сергеевич', '8888888888', 'sergey@example.com', '1978-11-25', 'ул. Пушкина, д. 5');
 
+-- Вставляем данные о счетах клиентов в таблицу accounts
 INSERT INTO accounts (account_type_id, currency, client_id)
 VALUES
     (1, 'RUB', 1),
@@ -67,29 +84,37 @@ VALUES
     (4, 'EUR', 9),
     (1, 'RUB', 10);
 
-UPDATE clients
-SET phone_number = '1111222233' 
-WHERE client_id = 1;
-
+-- Обновляем типы счетов на 'Депозитный', если они ранее были 'Кредитный'
 UPDATE accounts
 SET account_type_id = (SELECT contract_type_id FROM contract_types WHERE contract_type_name = 'Депозитный')
 WHERE account_type_id = (SELECT contract_type_id FROM contract_types WHERE contract_type_name = 'Кредитный');
 
+-- Вставляем данные о клиенте Иване Иванове, если у него есть контракт типа 'Кредитный'
 INSERT INTO clients (name, last_name, patronymic, phone_number, email, birthday, residential_address)
 SELECT 'Иван', 'Иванов', 'Сергеевич', '1234563890', 'vano@example.com', '1991-01-01', 'ул. Ленина, д. 1'
 FROM contract_types
 WHERE contract_type_name = 'Кредитный';
 
+-- Вставляем данные о клиенте с помощью подзапроса
+INSERT INTO clients (name, last_name, patronymic, phone_number, email, birthday, residential_address)
+SELECT 'Михаил', 'Михайлов', 'Михайлович', '9999999999', 'mikhail@example.com', '1986-06-06', 'ул. Гагарина, д. 9'
+FROM dual
+WHERE NOT EXISTS (
+    SELECT * FROM clients WHERE email = 'mikhail@example.com'
+);
 
-select *,
-(select contract_type_name from contract_types where account_type_id = contract_type_id) as dop_info
-from accounts
-where account_type_id <> any(select account_number from accounts);
+-- Выбираем все счета, кроме тех, которые являются самим собой
+SELECT *,
+(SELECT contract_type_name FROM contract_types WHERE account_type_id = contract_type_id) AS dop_info
+FROM accounts
+WHERE account_type_id <> ANY(SELECT account_number FROM accounts);
 
+-- Удаляем счета клиента с именем 'Елена'
 DELETE FROM accounts
 WHERE client_id = (SELECT client_id FROM clients WHERE name = 'Елена');
 
-select *
-from accounts
-where exists 
-	(select * from accounts where client_id = client_id);
+-- Выбираем все счета, где существует хотя бы один счет для того же клиента
+SELECT *
+FROM accounts
+WHERE EXISTS 
+    (SELECT * FROM accounts WHERE client_id = client_id);
