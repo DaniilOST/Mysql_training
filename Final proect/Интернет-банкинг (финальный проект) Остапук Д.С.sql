@@ -3,16 +3,16 @@ CREATE DATABASE online_banking;
 
 USE online_banking;
 
-drop table if exists Users;
-drop table if exists Accounts;
-drop table if exists Transactions;
-drop table if exists Recipients;
-drop table if exists CreditCards;
-drop table if exists LoginHistory;
-drop table if exists Notifications;
-drop table if exists NotificationSettings;
-drop table if exists Currencies;
-drop table if exists CurrencyRates;
+DROP TABLE IF exists Users;
+DROP TABLE IF exists Accounts;
+DROP TABLE IF exists Transactions;
+DROP TABLE IF exists Recipients;
+DROP TABLE IF exists CreditCards;
+DROP TABLE IF exists LoginHistory;
+DROP TABLE IF exists Notifications;
+DROP TABLE IF exists NotificationSettings;
+DROP TABLE IF exists Currencies;
+DROP TABLE IF exists CurrencyRates;
 
 CREATE TABLE Users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -82,7 +82,7 @@ CREATE TABLE NotificationSettings (
 CREATE TABLE Currencies (
     currency_id INT PRIMARY KEY AUTO_INCREMENT,
     currency_name VARCHAR(50),
-    symbol VARCHAR(5)
+    symbol VARCHAR(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
 );
 
 CREATE TABLE CurrencyRates (
@@ -203,19 +203,48 @@ INSERT INTO Currencies (currency_name, symbol) VALUES
 ('Russian Ruble', '₽');
 
 INSERT INTO CurrencyRates (currency_id_from, currency_id_to, exchange_rate) VALUES
-(1, 2, 0.85),
-(1, 3, 0.74),
-(2, 1, 1.18),
-(2, 3, 0.88),
-(3, 1, 1.35),
-(3, 2, 1.14),
-(4, 1, 0.0091),
-(4, 2, 0.0077),
-(5, 1, 0.78),
-(5, 2, 0.66);
+(1, 1, 1.0),    # Обменный курс для USD к USD
+(2, 1, 1.18),   # Обменный курс для EUR к USD
+(3, 1, 1.35),   # Обменный курс для GBP к USD
+(4, 1, 0.0091), # Обменный курс для JPY к USD
+(5, 1, 0.78),   # Обменный курс для CAD к USD
+(1, 2, 0.85),   # Обменный курс для USD к EUR
+(2, 2, 1.0),    # Обменный курс для EUR к EUR 
+(3, 2, 0.88),   # Обменный курс для GBP к EUR
+(4, 2, 0.0077), # Обменный курс для JPY к EUR
+(5, 2, 0.66);   # Обменный курс для CAD к EUR
 
-# Создаем представление для отображения информации о счетах пользователей
+# Представление для отображения информации о счетах пользователей
 CREATE VIEW AccountDetails AS
 SELECT A.account_id, A.account_number, A.balance, U.username
 FROM Accounts AS A
 JOIN Users U ON A.user_id = U.user_id;
+
+# Триггер для автоматического обновления баланса счета
+DELIMITER //
+
+CREATE TRIGGER UpdateAccountBalance AFTER INSERT ON Transactions
+FOR EACH ROW
+BEGIN
+    DECLARE account_balance DECIMAL(10, 2);
+    DECLARE transaction_amount DECIMAL(10, 2);
+    
+    # Получаем текущий баланс счета
+    SELECT balance INTO account_balance FROM Accounts WHERE account_id = NEW.account_id;
+
+    # Получаем сумму транзакции
+    SET transaction_amount = NEW.amount;
+
+    # Обновляем баланс счета в зависимости от типа транзакции
+    IF NEW.transaction_type = 'Deposit' THEN
+        SET account_balance = account_balance + transaction_amount;
+    ELSEIF NEW.transaction_type = 'Withdrawal' THEN
+        SET account_balance = account_balance - transaction_amount;
+    END IF;
+
+    # Обновляем баланс счета в таблице Accounts
+    UPDATE Accounts SET balance = account_balance WHERE account_id = NEW.account_id;
+END;
+//
+
+DELIMITER ;
