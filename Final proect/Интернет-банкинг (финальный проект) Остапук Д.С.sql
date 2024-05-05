@@ -222,29 +222,18 @@ JOIN Users U ON A.user_id = U.user_id;
 
 # Триггер для автоматического обновления баланса счета
 DELIMITER //
-
-CREATE TRIGGER UpdateAccountBalance AFTER INSERT ON Transactions
-FOR EACH ROW
+CREATE TRIGGER UpdateAccountBalance AFTER INSERT ON Transactions FOR EACH ROW
 BEGIN
     DECLARE account_balance DECIMAL(10, 2);
     DECLARE transaction_amount DECIMAL(10, 2);
-    
-    # Получаем текущий баланс счета
     SELECT balance INTO account_balance FROM Accounts WHERE account_id = NEW.account_id;
-
-    # Получаем сумму транзакции
     SET transaction_amount = NEW.amount;
-
-    # Обновляем баланс счета в зависимости от типа транзакции
     IF NEW.transaction_type = 'Deposit' THEN
         SET account_balance = account_balance + transaction_amount;
     ELSEIF NEW.transaction_type = 'Withdrawal' THEN
         SET account_balance = account_balance - transaction_amount;
     END IF;
-
-    # Обновляем баланс счета в таблице Accounts
     UPDATE Accounts SET balance = account_balance WHERE account_id = NEW.account_id;
 END;
 //
-
 DELIMITER ;
