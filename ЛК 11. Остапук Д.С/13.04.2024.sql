@@ -94,34 +94,11 @@ VALUES
     (4, 'EUR', 9),
     (1, 'RUB', 10);
 
-START TRANSACTION;
+create view account_currency as select a.client_id a_client_id, c.contract_type_id c_contract_id, c.contract_type_name c_contract_type_name
+from accounts as a
+join contract_types as c 
+on a.client_id = c.contract_type_id
+order by a.client_id desc;
 
--- Выбираем клиентов, имена которых начинаются с 'А'
-SELECT * FROM clients
-WHERE name LIKE 'А%';
-
--- Создаем точку сохранения
-SAVEPOINT save_1;
-
--- Обновляем адреса электронной почты для клиентов, имена которых начинаются с 'А'
-UPDATE clients
-SET email = CONCAT(email, '_updated')
-WHERE name LIKE 'А%';
-
--- Вставляем запись в журнал для операции обновления
-INSERT INTO log_table (log_type, table_name, client_id)
-SELECT 'update', 'clients', client_id
-FROM clients
-WHERE name LIKE 'А%';
-
--- Фиксируем транзакцию
-COMMIT;
-
--- Блокируем таблицы на чтение
-LOCK TABLES clients READ, log_table READ, accounts READ;
-
--- Выполняем оператор SELECT
-SELECT * FROM clients WHERE name LIKE 'А%';
-
--- Разблокируем таблицы
-UNLOCK TABLES;
+select * 
+from account_currency;
