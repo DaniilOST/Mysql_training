@@ -75,39 +75,29 @@ INSERT INTO employees (id, first_name, last_name, hire_date, job_id, salary, dep
 	INSERT INTO employees VALUES ( 206, 'William', 'Gietz', '2012-06-07', 'AD_PRES', 8300, 110, 205);   
     
 # 1.	Таблица Employees. Получить список всех сотрудников из 60го отдела (department_id) с зарплатой(salary), большей 4000
-
 select *
 from employees
 where department_id = 60 and salary>4000;
 
 #2.	Таблица Employees. Получить список всех сотрудников, у которых в имени содержатся минимум 2 буквы 'n'
-
 select*
 from Employees
 where first_name like ('%n%n%');
 
 #3.	Таблица Employees. Получить список всех ID менеджеров
-
 select manager_id
 from employees;
 
-#4 	Таблица Employees. Получить список работников с их позициями в формате: Donald(sh_clerk) 
-
-#5.	Таблица Departments. Получить первое слово из имени департамента для тех у кого в названии больше одного слова
 
 #6.	Таблица Employees. Получить список всех сотрудников, которые работают в компании больше 10 лет
 select id, first_name, last_name, hire_date
 from employees
 where  hire_date < '2014-05-06';
 
-#7 7.	Таблица Employees. Получить список всех сотрудников, которые пришли на работу в августе 2012го года. 
+#7.	Таблица Employees. Получить список всех сотрудников, которые пришли на работу в августе 2012го года. 
 select id, first_name, last_name, hire_date
 from employees
 where  hire_date between '2011-12-31' and '2013-01-01';
-
-#8.	Таблица Employees. Сколько сотрудников имена которых начинается с одной и той же буквы? Сортировать по количеству. Показывать только те где количество больше 1
-
-# 9.	Таблица Employees. Сколько сотрудников которые работают в одном и тоже отделе и получают одинаковую зарплату? 
 
 select department_id, salary, count(*) as emp_count
 from employees
